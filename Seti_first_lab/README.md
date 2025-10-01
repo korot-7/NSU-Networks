@@ -16,7 +16,7 @@
 ---
 
 ## Сборка и запуск
-- Если запукать в IDEA, то нужно только указать в Run Configurations в Program arguments: <multicast-address>
+- Если запукать в IDEA, то нужно только указать в **Run Configurations** в **Program arguments**: <<multicast-address>>
 
 - Если через терминал Linux, то нужно сначала собрать .jar файл:
 ```
