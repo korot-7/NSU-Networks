@@ -18,6 +18,8 @@
 ## Сборка и запуск
 - Если запускать в IDEA, то нужно только указать в **Run Configurations** в **Program arguments**: `<multicast-address>`
 
+`<multicast-address> например 230.0.0.1 (для IPv4) и ff02::1 (для IPv6)`
+
 - Если через терминал Linux, то нужно сначала собрать .jar файл:
 ```
 mvn clean package
