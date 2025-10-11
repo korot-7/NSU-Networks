@@ -10,6 +10,9 @@ public class Main {
         try {
             Manager manager = new Manager(args[0]);
             manager.start();
+
+            Runtime.getRuntime().addShutdownHook(new Thread(manager::stop));
+
         } catch (Exception e) {
             System.err.println("Failed: " + e.getMessage());
             System.exit(1);
