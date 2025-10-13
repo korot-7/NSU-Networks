@@ -98,14 +98,18 @@ public class Manager {
                 if (addr == null) continue;
 
                 if (addr instanceof Inet4Address && !needIPv6) {
-                    if (getLocalAddressForInterface(ni, needIPv6).startsWith(NETWORK_ADDRESS_IPV4)) {
+                    String localAddressForInterface = getLocalAddressForInterface(ni, needIPv6);
+                    if (localAddressForInterface == null) continue;
+                    if (localAddressForInterface.startsWith(NETWORK_ADDRESS_IPV4)) {
                         System.out.println("Detected interface: " + ni.getDisplayName() +
                                 " (" + addr.getHostAddress() + ")");
                         return ni;
                     }
                 }
                 if (addr instanceof Inet6Address && needIPv6) {
-                    if (getLocalAddressForInterface(ni, needIPv6).startsWith(NETWORK_ADDRESS_IPV6)) {
+                    String localAddressForInterface = getLocalAddressForInterface(ni, needIPv6);
+                    if (localAddressForInterface == null) continue;
+                    if (localAddressForInterface.startsWith(NETWORK_ADDRESS_IPV6)) {
                         if (ni.getDisplayName().contains("Virtual")) continue;
                         System.out.println("Detected interface: " + ni.getDisplayName() +
                                 " (" + addr.getHostAddress() + ")");
@@ -185,7 +189,7 @@ public class Manager {
                 if (message.startsWith("Hello@")) {
                     String[] parts = message.split("@");
                     if (parts.length >= 3) {
-                        String remoteIp = parts[1];
+                        String remoteIp = packet.getAddress().getHostAddress();
                         String remoteProcessID = parts[2];
 
                         if (remoteProcessID.equals(processID)) {
