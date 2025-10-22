@@ -8,10 +8,14 @@
 
 ### Запуск Сервера
 Откройте проект Server в IDEA и запустите Main, но нужно указать в Run Configurations в Program arguments: `<port>`
+
 `<port> например 12345`
 
 ### Запуск Клиента
 Откройте проект Server в IDEA и запустите Main, но нужно указать в Run Configurations в Program arguments: `<address-server> <port> <path-to-file>`
+
 `<address-server> нужен адрес сервера, и при запуске сервера, он пишет в терминал его адрес, по которому к нему обращаться`
+
 `<port> нужен порт, и при запуске сервера, он пишет в терминал порт, по которому к нему обращаться`
-`<path-to-file> нужен путь до файла (абсолюьный или относительный), который хочешь отправить. Например C:\Users\sibir\Downloads\example.txt`
+
+`<path-to-file> нужен путь до файла (абсолютный или относительный), который хочешь отправить. Например C:\Users\sibir\Downloads\example.txt`
