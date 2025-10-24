@@ -1,15 +1,17 @@
 package client;
 
+import com.google.gson.Gson;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FileSender {
     private static final int BUFFER_SIZE = 4096;
     private final String host;
     private final int port;
     private final File file;
+    private final Gson gson = new Gson();
 
     public static class FileInfo {
         public String filename;
@@ -37,9 +39,8 @@ public class FileSender {
             writer.write("INFO\n");
             writer.flush();
 
-            ObjectMapper mapper = new ObjectMapper();
             FileInfo fileInfo = new FileInfo(file.getName(), file.length());
-            String json = mapper.writeValueAsString(fileInfo);
+            String json = gson.toJson(fileInfo);
             writer.write(json + "\n");
             writer.flush();
 

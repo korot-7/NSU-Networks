@@ -4,12 +4,15 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicLong;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 public class ClientHandler implements Runnable {
     private final Socket socket;
     private final File uploadsDir;
     private final String clientInfo;
+    private final Gson gson = new Gson();
+
     public static final long STATS_INTERVAL_MS = 3000;
     private static final int BUFFER_BYTES_SIZE = 8 * 1024;
     public static final double BYTES_TO_MB = 1024.0 * 1024.0;
@@ -59,8 +62,14 @@ public class ClientHandler implements Runnable {
                 return;
             }
 
-            ObjectMapper mapper = new ObjectMapper();
-            FileInfo info = mapper.readValue(json, FileInfo.class);
+            FileInfo info;
+            try {
+                info = gson.fromJson(json, FileInfo.class);
+            } catch (JsonSyntaxException e) {
+                writer.write("ERROR\n");
+                writer.flush();
+                return;
+            }
 
             if (info.filename == null || info.filename.isEmpty() || info.size <= 0) {
                 writer.write("ERROR\n");
