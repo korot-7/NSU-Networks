@@ -1,7 +1,7 @@
 package GUI;
 
 import javafx.application.Platform;
-import workApi.FindLocationAPI;
+import workApi.baseApi.FindLocationAPI;
 import workApi.WorkAPI;
 
 import java.io.IOException;

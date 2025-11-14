@@ -1,6 +1,9 @@
 package workApi;
 
 import model.*;
+import workApi.baseApi.GetDescriptionAPI;
+import workApi.baseApi.GetPlacesAPI;
+import workApi.baseApi.GetWeatherAPI;
 
 import java.net.http.HttpClient;
 import java.util.*;
