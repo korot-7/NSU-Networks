@@ -26,5 +26,5 @@ mvn clean package
 ```
 И потом запуск:
 ```
-java -cp target/Seti_first_lab-1.0-SNAPSHOT.jar org.example.Main <multicast-address>
+java -cp target/lab1-1.0-SNAPSHOT.jar org.example.Main <multicast-address>
 ```
