@@ -24,10 +24,8 @@ public class ClientSession {
     SocketChannel remoteChannel;
     SelectionKey remoteKey;
 
-    final ByteBuffer clientRead = ByteBuffer.allocateDirect(Constants.BUFFER_SIZE);
-    final ByteBuffer clientWrite = ByteBuffer.allocateDirect(Constants.BUFFER_SIZE);
-    final ByteBuffer remoteRead = ByteBuffer.allocateDirect(Constants.BUFFER_SIZE);
-    final ByteBuffer remoteWrite = ByteBuffer.allocateDirect(Constants.BUFFER_SIZE);
+    final ByteBuffer clientToRemote = ByteBuffer.allocateDirect(Constants.BUFFER_SIZE);
+    final ByteBuffer remoteToClient = ByteBuffer.allocateDirect(Constants.BUFFER_SIZE);
 
     String dstHost;
     int dstPort;
@@ -43,28 +41,32 @@ public class ClientSession {
     void onReadable(SelectionKey key) throws IOException {
         if (key.channel() == clientChannel) {
             if (state == ClientSession.State.HANDSHAKE || state == ClientSession.State.REQUEST) {
-                int r = clientChannel.read(clientRead);
+                int r = clientChannel.read(clientToRemote);
                 if (r < 0) {
                     close();
                     return;
                 }
-                clientRead.flip();
+                clientToRemote.flip();
                 if (state == ClientSession.State.HANDSHAKE) {
                     if (!tryHandleHandshake()) {
-                        clientRead.compact();
+                        clientToRemote.compact();
                         return;
                     }
                     state = ClientSession.State.REQUEST;
                 }
                 if (state == ClientSession.State.REQUEST) {
                     if (!tryHandleRequest()) {
-                        clientRead.compact();
+                        clientToRemote.compact();
                         return;
                     }
                 }
-                clientRead.compact();
+                clientToRemote.compact();
             } else if (state == ClientSession.State.RELAY) {
-                int r = clientChannel.read(remoteWrite);
+                if (clientToRemote.remaining() == 0) {
+                    disableOp(clientKey, SelectionKey.OP_READ);
+                    return;
+                }
+                int r = clientChannel.read(clientToRemote);
                 if (r < 0) {
                     if (remoteChannel != null && remoteChannel.isOpen()) remoteChannel.shutdownOutput();
                     disableOp(clientKey, SelectionKey.OP_READ);
@@ -73,36 +75,34 @@ public class ClientSession {
                 }
             }
         } else if (key.channel() == remoteChannel) {
-            int r = remoteChannel.read(remoteRead);
+            if (remoteToClient.remaining() == 0) {
+                disableOp(remoteKey, SelectionKey.OP_READ);
+                return;
+            }
+            int r = remoteChannel.read(remoteToClient);
             if (r < 0) {
                 if (clientChannel != null && clientChannel.isOpen()) clientChannel.shutdownOutput();
                 disableOp(remoteKey, SelectionKey.OP_READ);
             } else if (r > 0) {
-                remoteRead.flip();
-                if (clientWrite.remaining() < remoteRead.remaining()) {
-                    disableOp(remoteKey, SelectionKey.OP_READ);
-                    return;
-                }
-                clientWrite.put(remoteRead);
-                remoteRead.clear();
-                enableOp(clientKey, SelectionKey.OP_WRITE);
+                if (clientKey != null && clientKey.isValid()) enableOp(clientKey, SelectionKey.OP_WRITE);
             }
         }
     }
 
     void onWritable(SelectionKey key) throws IOException {
         if (key.channel() == clientChannel) {
-            clientWrite.flip();
-            clientChannel.write(clientWrite);
-            clientWrite.compact();
-            if (clientWrite.position() == 0) disableOp(clientKey, SelectionKey.OP_WRITE);
-            enableOp(clientKey, SelectionKey.OP_READ);
+            remoteToClient.flip();
+            clientChannel.write(remoteToClient);
+            remoteToClient.compact();
+            if (remoteToClient.position() < Constants.BUFFER_SIZE) {
+                if (remoteKey != null && remoteKey.isValid()) enableOp(remoteKey, SelectionKey.OP_READ);
+            }
+            if (remoteToClient.position() == 0) disableOp(clientKey, SelectionKey.OP_WRITE);
         } else if (key.channel() == remoteChannel) {
-            remoteWrite.flip();
-            remoteChannel.write(remoteWrite);
-            remoteWrite.compact();
-            if (remoteWrite.position() == 0) disableOp(remoteKey, SelectionKey.OP_WRITE);
-            enableOp(clientKey, SelectionKey.OP_READ);
+            clientToRemote.flip();
+            remoteChannel.write(clientToRemote);
+            clientToRemote.compact();
+            if (clientToRemote.position() == 0) disableOp(remoteKey, SelectionKey.OP_WRITE);
         }
     }
 
@@ -116,22 +116,27 @@ public class ClientSession {
                 enableOp(remoteKey, SelectionKey.OP_READ);
             }
         } catch (IOException e) {
-            sendSocksReplyFailure(Constants.CONNECTION_REFUSED);
+            sendSocksReplyFailure(Constants.REP_CONNECTION_REFUSED);
             close();
         }
     }
 
     private boolean tryHandleHandshake() throws IOException {
-        if (clientRead.remaining() < Constants.BUFFER_HANDSHAKE) return false;
-        clientRead.mark();
-        byte ver = clientRead.get();
-        byte nmethods = clientRead.get();
+        if (clientToRemote.remaining() < Constants.BUFFER_HANDSHAKE) return false;
+        clientToRemote.mark();
+        byte ver = clientToRemote.get();
+        byte nmethods = clientToRemote.get();
         if (ver != Constants.VERSION_SOCKS) {
             close();
             return false;
         }
+
+        if (clientToRemote.remaining() < (nmethods & Constants.BYTE_MASK)) {
+            clientToRemote.reset();
+            return false;
+        }
         boolean noAuth = false;
-        for (int i = 0; i < nmethods; i++) if (clientRead.get() == Constants.NOAUTH) noAuth = true;
+        for (int i = 0; i < nmethods; i++) if (clientToRemote.get() == Constants.NOAUTH) noAuth = true;
         ByteBuffer out = ByteBuffer.allocate(Constants.BUFFER_HANDSHAKE);
         out.put(Constants.VERSION_SOCKS);
         out.put(noAuth ? Constants.NOAUTH : Constants.NO_ACCEPTABLE_METHODS);
@@ -146,12 +151,12 @@ public class ClientSession {
     }
 
     private boolean tryHandleRequest() throws IOException {
-        if (clientRead.remaining() < Constants.BUFFER_REQUEST) return false;
-        clientRead.mark();
-        byte ver = clientRead.get();
-        byte cmd = clientRead.get();
-        clientRead.get();
-        byte atyp = clientRead.get();
+        if (clientToRemote.remaining() < Constants.BUFFER_REQUEST) return false;
+        clientToRemote.mark();
+        byte ver = clientToRemote.get();
+        byte cmd = clientToRemote.get();
+        clientToRemote.get();
+        byte atyp = clientToRemote.get();
         if (ver != Constants.VERSION_SOCKS) {
             close();
             return false;
@@ -162,22 +167,30 @@ public class ClientSession {
             return true;
         }
         if (atyp == Constants.ATYP_IP_V4) {
-            byte[] addr = new byte[Constants.BUFFER_REQUEST];
-            clientRead.get(addr);
-            int port = ((clientRead.get() & Constants.TRANSFORMATION_BYTES) << Constants.COUNT_BITS_IN_BYTE) | (clientRead.get() & Constants.TRANSFORMATION_BYTES);
+            if (clientToRemote.remaining() < Constants.IPV4_ADDRESS_BYTES + Constants.PORT_BYTES) {
+                clientToRemote.reset();
+                return false;
+            }
+            byte[] addr = new byte[Constants.IPV4_ADDRESS_BYTES];
+            clientToRemote.get(addr);
+            int port = ((clientToRemote.get() & Constants.BYTE_MASK) << Constants.COUNT_BITS_IN_BYTE) | (clientToRemote.get() & Constants.BYTE_MASK);
             dstAddr = new InetSocketAddress(InetAddress.getByAddress(addr), port);
             startConnectToDst();
             return true;
         } else if (atyp == Constants.ATYP_DOMAINNAME) {
-            if (clientRead.remaining() < 1) {
-                clientRead.reset();
+            if (clientToRemote.remaining() < Constants.DOMAIN_LENGTH_BYTES) {
+                clientToRemote.reset();
                 return false;
             }
-            int len = clientRead.get() & Constants.TRANSFORMATION_BYTES;
+            int len = clientToRemote.get() & Constants.BYTE_MASK;
+            if (clientToRemote.remaining() < len + Constants.PORT_BYTES) {
+                clientToRemote.reset();
+                return false;
+            }
             byte[] name = new byte[len];
-            clientRead.get(name);
+            clientToRemote.get(name);
             dstHost = new String(name);
-            dstPort = ((clientRead.get() & Constants.TRANSFORMATION_BYTES) << Constants.COUNT_BITS_IN_BYTE) | (clientRead.get() & Constants.TRANSFORMATION_BYTES);
+            dstPort = ((clientToRemote.get() & Constants.BYTE_MASK) << Constants.COUNT_BITS_IN_BYTE) | (clientToRemote.get() & Constants.BYTE_MASK);
             state = ClientSession.State.CONNECTING;
             dnsResolver.sendDnsQuery(this, dstHost, dstPort);
             return true;
@@ -253,6 +266,7 @@ public class ClientSession {
     void close() {
         state = ClientSession.State.CLOSED;
         try {
+            dnsResolver.cancelPendingForSession(this);
             if (clientKey != null) clientKey.cancel();
             if (remoteKey != null) remoteKey.cancel();
             if (clientChannel != null) clientChannel.close();

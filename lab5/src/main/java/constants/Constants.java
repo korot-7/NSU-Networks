@@ -19,21 +19,28 @@ public class Constants {
     public static final byte REP_HOST_UNREACHABLE = 0x04;
 
     public static final byte VERSION_SOCKS = 0x05;
-    public static final byte CONNECTION_REFUSED = 0x05;
+    public static final byte REP_CONNECTION_REFUSED = 0x05;
 
     public static final byte REP_COMMAND_NOT_SUPPORTED = 0x07;
 
     public static final byte REP_ADDRESS_TYPE_NOT_SUPPORTED = 0x08;
 
     public static final byte NO_ACCEPTABLE_METHODS = (byte) 0xFF;
-    public static final int TRANSFORMATION_BYTES = 0xFF;
+    public static final int BYTE_MASK = 0xFF;
 
     public static final int BUFFER_HANDSHAKE = 2;
     public static final int BUFFER_REQUEST = 4;
     public static final int BUFFER_REPLY = 10;
 
-    public static final int COUNT_BITS_IN_BYTE = 10;
+    public static final int PORT_BYTES = 2;
+    public static final int IPV4_ADDRESS_BYTES = 4;
+    public static final int DOMAIN_LENGTH_BYTES = 1;
+
+    public static final int COUNT_BITS_IN_BYTE = 8;
 
     public static final byte[] EMPTY_IPV4 = new byte[]{0, 0, 0, 0};
     public static final short EMPTY_PORT = 0;
+
+    public static final int PENDING_TIMEOUT_MS = 5000;
+    public static final int MAX_PENDING_REQUESTS = 5000;
 }
