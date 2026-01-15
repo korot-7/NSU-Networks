@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="lab4.snake.controller.GameController"
+            style="-fx-background-color: #1a1a2e;">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20"
+              style="-fx-background-color: #2a2a4e; -fx-padding: 10;">
+
+            <Label fx:id="gameNameLabel" text="Игра: ..."
+                   style="-fx-text-fill: #FFD700; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+            <Separator orientation="VERTICAL"/>
+
+            <Label fx:id="roleLabel" text="Роль: ..."
+                   style="-fx-text-fill: #00ff88; -fx-font-size: 14px;"/>
+
+            <Label fx:id="stateLabel" text="Ход: 0"
+                   style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Управление: W A S D или стрелки"
+                   style="-fx-text-fill: gray; -fx-font-size: 12px;"/>
+
+            <Button fx:id="exitButton" text="Выход" onAction="#onExit"
+                    style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <Pane fx:id="canvasContainer"
+              style="-fx-background-color: #0a0a15;">
+            <Canvas fx:id="gameCanvas"/>
+        </Pane>
+    </center>
+
+    <right>
+        <VBox fx:id="scoreboardContainer" prefWidth="200"
+              style="-fx-background-color: #2a2a4e;">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+        </VBox>
+    </right>
+
+</BorderPane>
