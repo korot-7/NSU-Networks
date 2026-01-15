@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="lab4.snake.controller.NewGameController"
+      alignment="CENTER" spacing="20"
+      style="-fx-background-color: #1a1a2e;">
+
+    <padding>
+        <Insets top="30" right="50" bottom="30" left="50"/>
+    </padding>
+
+    <Label text="Создание новой игры"
+           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #00ff88;">
+    </Label>
+
+    <GridPane hgap="15" vgap="15" alignment="CENTER">
+        <Label text="Название игры:" GridPane.rowIndex="0" GridPane.columnIndex="0"
+               style="-fx-text-fill: white;"/>
+        <TextField fx:id="gameNameField" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                   prefWidth="200" style="-fx-background-color: #2a2a4e; -fx-text-fill: white;"/>
+
+<!--        <Label text="Ваше имя:" GridPane.rowIndex="1" GridPane.columnIndex="0"-->
+<!--               style="-fx-text-fill: white;"/>-->
+<!--        <Label fx:id="playerNameLabel" text="..." styleClass="player-name-label" GridPane.rowIndex="1" GridPane.columnIndex="1"-->
+<!--                   prefWidth="200" style="-fx-background-color: #2a2a4e; -fx-text-fill: white;"/>-->
+
+        <Label text="Ширина поля:" GridPane.rowIndex="1" GridPane.columnIndex="0"
+               style="-fx-text-fill: white;"/>
+        <Spinner fx:id="widthSpinner" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                 prefWidth="200" editable="true"/>
+
+        <Label text="Высота поля:" GridPane.rowIndex="2" GridPane.columnIndex="0"
+               style="-fx-text-fill: white;"/>
+        <Spinner fx:id="heightSpinner" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                 prefWidth="200" editable="true"/>
+
+        <Label text="Базовое кол-во еды:" GridPane.rowIndex="3" GridPane.columnIndex="0"
+               style="-fx-text-fill: white;"/>
+        <Spinner fx:id="foodSpinner" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                 prefWidth="200" editable="true"/>
+
+        <Label text="Задержка (мс):" GridPane.rowIndex="4" GridPane.columnIndex="0"
+               style="-fx-text-fill: white;"/>
+        <Spinner fx:id="delaySpinner" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                 prefWidth="200" editable="true"/>
+    </GridPane>
+
+    <Label text="Меньше значение = быстрее игра"
+           style="-fx-text-fill: gray; -fx-font-size: 11px;"/>
+
+    <HBox alignment="CENTER" spacing="20">
+        <Button fx:id="backButton" text="← Назад" onAction="#onBack"
+                prefWidth="120" prefHeight="40"
+                style="-fx-background-color: #666; -fx-text-fill: white;"/>
+
+        <Button fx:id="startButton" text="Начать игру" onAction="#onStartGame"
+                prefWidth="150" prefHeight="40"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px;"/>
+    </HBox>
+
+</VBox>

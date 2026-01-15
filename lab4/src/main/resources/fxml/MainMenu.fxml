@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="lab4.snake.controller.MainMenuController"
+      alignment="CENTER" spacing="20"
+      style="-fx-background-color: #1a1a2e;">
+
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+
+    <Label text="🐍 Сетевая Змейка"
+           style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #00ff88;">
+    </Label>
+
+    <HBox alignment="CENTER" spacing="10">
+        <Label text="Ваше имя:" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+        <TextField fx:id="playerNameField" prefWidth="200"
+                   style="-fx-background-color: #2a2a4e; -fx-text-fill: white;"/>
+    </HBox>
+
+    <VBox spacing="10" VBox.vgrow="ALWAYS">
+        <Label text="Доступные игры:" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+
+        <TableView fx:id="gamesTable" VBox.vgrow="ALWAYS"
+                   style="-fx-background-color: #2a2a4e;">
+            <columns>
+                <TableColumn fx:id="nameColumn" text="Название" prefWidth="200"/>
+                <TableColumn fx:id="sizeColumn" text="Размер" prefWidth="100"/>
+                <TableColumn fx:id="playersColumn" text="Игроки" prefWidth="80"/>
+                <TableColumn fx:id="canJoinColumn" text="Доступна" prefWidth="80"/>
+            </columns>
+            <placeholder>
+                <Label text="Поиск игр..." style="-fx-text-fill: gray;"/>
+            </placeholder>
+        </TableView>
+    </VBox>
+
+    <HBox alignment="CENTER" spacing="15">
+        <Button fx:id="joinButton" text="Присоединиться" onAction="#onJoinGame"
+                prefWidth="150" prefHeight="40"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px;"/>
+
+        <Button fx:id="viewButton" text="Наблюдать" onAction="#onViewGame"
+                prefWidth="150" prefHeight="40"
+                style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px;"/>
+
+        <Button fx:id="newGameButton" text="Новая игра" onAction="#onNewGame"
+                prefWidth="150" prefHeight="40"
+                style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px;"/>
+    </HBox>
+
+    <Button fx:id="exitButton" text="Выход" onAction="#onExit"
+            prefWidth="120" prefHeight="35"
+            style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+
+</VBox>
